@@ -1,6 +1,7 @@
 using System.Globalization;
 using System.Text;
 using System.Windows.Forms;
+using static System.Windows.Forms.LinkLabel;
 
 namespace Frame_Parser
 {
@@ -30,6 +31,12 @@ namespace Frame_Parser
                 return;
             }
 
+            btnParse.Enabled = false;
+            parsedFrames.Clear();
+            lstFrames.Items.Clear();
+            txtFrameDetails.Clear();
+            UpdateExportButtons();
+
             try
             {
                 var parser = new LogParser();
@@ -37,11 +44,17 @@ namespace Frame_Parser
 
                 // Display frames in listbox
                 lstFrames.Items.Clear();
+                Program.MainForm.progressBar1.Show();
+                Program.MainForm.progressBar1.Maximum = parsedFrames.Count;
                 foreach (var frame in parsedFrames)
                 {
                     string frameType = frame.Type == FrameType.MainFrame ? "Main" : "OBD2";
                     lstFrames.Items.Add($"{frame.Timestamp:HH:mm:ss.fff} - {frameType} Frame");
+                    Program.MainForm.progressBar1.Value = lstFrames.Items.Count;
+                    Application.DoEvents(); // Allow UI to update
                 }
+                Program.MainForm.progressBar1.Hide();
+                
 
                 if (parsedFrames.Count > 0)
                 {
@@ -62,6 +75,8 @@ namespace Frame_Parser
                 MessageBox.Show($"Error parsing file: {ex.Message}", "Error",
                               MessageBoxButtons.OK, MessageBoxIcon.Error);
             }
+
+            btnParse.Enabled = true;
         }
 
         private void UpdateExportButtons()
@@ -72,6 +87,7 @@ namespace Frame_Parser
 
             btnExportMainFrames.Enabled = hasFrames && hasMainFrames;
             btnExportOBD2Frames.Enabled = hasFrames && hasOBD2Frames;
+            btnDifTimerCSV.Enabled = btnExportMainFrames.Enabled;
         }
 
         private void lstFrames_SelectedIndexChanged(object sender, EventArgs e)
@@ -168,6 +184,34 @@ namespace Frame_Parser
                     EscapeCsvField(frame.RawData)
                 );
                 csv.AppendLine(line);
+            }
+
+            File.WriteAllText(filePath, csv.ToString(), Encoding.UTF8);
+        }
+
+        private void ExportDifTimerToCsv(List<MainFrame> frames, string filePath)
+        {
+            var csv = new StringBuilder();
+
+            // Header
+            csv.AppendLine("Timestamp;Timer1;Timer2;Dif1;Dif2");
+                var LastT1 = frames[0].Timer1;
+                var LastT2 = frames[0].Timer2;
+
+            // Data rows
+            foreach (var frame in frames)
+            {
+                var line = string.Join(";",
+                    frame.Timestamp.ToString("HH:mm:ss.fff"),
+
+                    frame.Timer1.ToString(),
+                    frame.Timer2.ToString(),
+                    (frame.Timer1 - LastT1).ToString(),
+                    (frame.Timer2 - LastT2).ToString()
+                );
+                csv.AppendLine(line);
+                LastT1 = frame.Timer1;
+                LastT2 = frame.Timer2;
             }
 
             File.WriteAllText(filePath, csv.ToString(), Encoding.UTF8);
@@ -284,6 +328,30 @@ Fuel Tank Level: {frame.FuelTankLevel}%
 Engine Total Hours: {frame.EngineTotalHours} seconds
 Odometer: {frame.Odometer:N0} km
 Diagnostic Trouble Code: 0x{frame.DTC:X8}";
+        }
+
+        private void btnDifTimerCSV_Click(object sender, EventArgs e)
+        {
+            var frames = parsedFrames.OfType<MainFrame>().ToList();
+            string frameTypeName = "Timer_Dif";
+            saveFileDialog.FileName = "TimeDif.csv";
+            saveFileDialog.Title = $"Export {frameTypeName} to CSV";
+
+            if (saveFileDialog.ShowDialog() == DialogResult.OK)
+            {
+                try
+                {
+                    ExportDifTimerToCsv(frames as List<MainFrame>, saveFileDialog.FileName);
+
+                    MessageBox.Show($"Successfully exported {frames.Count} {frameTypeName} to {saveFileDialog.FileName}",
+                                  "Success", MessageBoxButtons.OK, MessageBoxIcon.Information);
+                }
+                catch (Exception ex)
+                {
+                    MessageBox.Show($"Error exporting {frameTypeName}: {ex.Message}", "Error",
+                                  MessageBoxButtons.OK, MessageBoxIcon.Error);
+                }
+            }
         }
     }
 

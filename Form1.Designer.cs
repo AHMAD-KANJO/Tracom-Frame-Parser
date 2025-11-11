@@ -15,7 +15,8 @@
         private Button btnExportMainFrames;
         private Button btnExportOBD2Frames;
         private SaveFileDialog saveFileDialog;
-
+        private Button btnDifTimerCSV;
+        public ProgressBar progressBar1;
         protected override void Dispose(bool disposing)
         {
             if (disposing && (components != null))
@@ -27,136 +28,185 @@
 
         private void InitializeComponent()
         {
-            this.components = new System.ComponentModel.Container();
-            this.btnLoadFile = new Button();
-            this.txtFilePath = new TextBox();
-            this.lblFilePath = new Label();
-            this.lstFrames = new ListBox();
-            this.lblFrames = new Label();
-            this.txtFrameDetails = new TextBox();
-            this.lblDetails = new Label();
-            this.btnParse = new Button();
-            this.openFileDialog = new OpenFileDialog();
-            this.btnExportMainFrames = new Button();
-            this.btnExportOBD2Frames = new Button();
-            this.saveFileDialog = new SaveFileDialog();
-
+            btnLoadFile = new Button();
+            txtFilePath = new TextBox();
+            lblFilePath = new Label();
+            lstFrames = new ListBox();
+            lblFrames = new Label();
+            txtFrameDetails = new TextBox();
+            lblDetails = new Label();
+            btnParse = new Button();
+            openFileDialog = new OpenFileDialog();
+            btnExportMainFrames = new Button();
+            btnExportOBD2Frames = new Button();
+            saveFileDialog = new SaveFileDialog();
+            btnDifTimerCSV = new Button();
+            progressBar1 = new ProgressBar();
             SuspendLayout();
-
-            // lblFilePath
-            this.lblFilePath.AutoSize = true;
-            this.lblFilePath.Location = new Point(12, 15);
-            this.lblFilePath.Name = "lblFilePath";
-            this.lblFilePath.Size = new Size(51, 15);
-            this.lblFilePath.Text = "Log File:";
-
-            // txtFilePath
-            this.txtFilePath.Anchor = AnchorStyles.Top | AnchorStyles.Left | AnchorStyles.Right;
-            this.txtFilePath.Location = new Point(69, 12);
-            this.txtFilePath.Name = "txtFilePath";
-            this.txtFilePath.Size = new Size(450, 23);
-            this.txtFilePath.TabIndex = 1;
-
+            // 
             // btnLoadFile
-            this.btnLoadFile.Anchor = AnchorStyles.Top | AnchorStyles.Right;
-            this.btnLoadFile.Location = new Point(525, 12);
-            this.btnLoadFile.Name = "btnLoadFile";
-            this.btnLoadFile.Size = new Size(75, 23);
-            this.btnLoadFile.TabIndex = 2;
-            this.btnLoadFile.Text = "Browse";
-            this.btnLoadFile.UseVisualStyleBackColor = true;
-            this.btnLoadFile.Click += new EventHandler(this.btnLoadFile_Click);
-
+            // 
+            btnLoadFile.Anchor = AnchorStyles.Top | AnchorStyles.Right;
+            btnLoadFile.Location = new Point(600, 16);
+            btnLoadFile.Margin = new Padding(3, 4, 3, 4);
+            btnLoadFile.Name = "btnLoadFile";
+            btnLoadFile.Size = new Size(86, 31);
+            btnLoadFile.TabIndex = 2;
+            btnLoadFile.Text = "Browse";
+            btnLoadFile.UseVisualStyleBackColor = true;
+            btnLoadFile.Click += btnLoadFile_Click;
+            // 
+            // txtFilePath
+            // 
+            txtFilePath.Anchor = AnchorStyles.Top | AnchorStyles.Left | AnchorStyles.Right;
+            txtFilePath.Location = new Point(79, 16);
+            txtFilePath.Margin = new Padding(3, 4, 3, 4);
+            txtFilePath.Name = "txtFilePath";
+            txtFilePath.Size = new Size(514, 27);
+            txtFilePath.TabIndex = 1;
+            // 
+            // lblFilePath
+            // 
+            lblFilePath.AutoSize = true;
+            lblFilePath.Location = new Point(14, 20);
+            lblFilePath.Name = "lblFilePath";
+            lblFilePath.Size = new Size(64, 20);
+            lblFilePath.TabIndex = 23;
+            lblFilePath.Text = "Log File:";
+            // 
             // lstFrames
-            this.lstFrames.Anchor = AnchorStyles.Top | AnchorStyles.Bottom | AnchorStyles.Left;
-            this.lstFrames.FormattingEnabled = true;
-            this.lstFrames.ItemHeight = 15;
-            this.lstFrames.Location = new Point(12, 70);
-            this.lstFrames.Name = "lstFrames";
-            this.lstFrames.Size = new Size(250, 334);
-            this.lstFrames.TabIndex = 3;
-            this.lstFrames.SelectedIndexChanged += new EventHandler(this.lstFrames_SelectedIndexChanged);
-
+            // 
+            lstFrames.Anchor = AnchorStyles.Top | AnchorStyles.Bottom | AnchorStyles.Left;
+            lstFrames.FormattingEnabled = true;
+            lstFrames.Location = new Point(14, 93);
+            lstFrames.Margin = new Padding(3, 4, 3, 4);
+            lstFrames.Name = "lstFrames";
+            lstFrames.Size = new Size(285, 444);
+            lstFrames.TabIndex = 3;
+            lstFrames.SelectedIndexChanged += lstFrames_SelectedIndexChanged;
+            // 
             // lblFrames
-            this.lblFrames.AutoSize = true;
-            this.lblFrames.Location = new Point(12, 52);
-            this.lblFrames.Name = "lblFrames";
-            this.lblFrames.Size = new Size(81, 15);
-            this.lblFrames.Text = "Parsed Frames:";
-
+            // 
+            lblFrames.AutoSize = true;
+            lblFrames.Location = new Point(14, 69);
+            lblFrames.Name = "lblFrames";
+            lblFrames.Size = new Size(106, 20);
+            lblFrames.TabIndex = 22;
+            lblFrames.Text = "Parsed Frames:";
+            // 
             // txtFrameDetails
-            this.txtFrameDetails.Anchor = AnchorStyles.Top | AnchorStyles.Bottom | AnchorStyles.Left | AnchorStyles.Right;
-            this.txtFrameDetails.Location = new Point(268, 70);
-            this.txtFrameDetails.Multiline = true;
-            this.txtFrameDetails.Name = "txtFrameDetails";
-            this.txtFrameDetails.ReadOnly = true;
-            this.txtFrameDetails.ScrollBars = ScrollBars.Vertical;
-            this.txtFrameDetails.Size = new Size(332, 334);
-            this.txtFrameDetails.TabIndex = 4;
-
+            // 
+            txtFrameDetails.Anchor = AnchorStyles.Top | AnchorStyles.Bottom | AnchorStyles.Left | AnchorStyles.Right;
+            txtFrameDetails.Location = new Point(306, 93);
+            txtFrameDetails.Margin = new Padding(3, 4, 3, 4);
+            txtFrameDetails.Multiline = true;
+            txtFrameDetails.Name = "txtFrameDetails";
+            txtFrameDetails.ReadOnly = true;
+            txtFrameDetails.ScrollBars = ScrollBars.Vertical;
+            txtFrameDetails.Size = new Size(379, 444);
+            txtFrameDetails.TabIndex = 4;
+            // 
             // lblDetails
-            this.lblDetails.AutoSize = true;
-            this.lblDetails.Location = new Point(268, 52);
-            this.lblDetails.Name = "lblDetails";
-            this.lblDetails.Size = new Size(85, 15);
-            this.lblDetails.Text = "Frame Details:";
-
+            // 
+            lblDetails.AutoSize = true;
+            lblDetails.Location = new Point(306, 69);
+            lblDetails.Name = "lblDetails";
+            lblDetails.Size = new Size(103, 20);
+            lblDetails.TabIndex = 21;
+            lblDetails.Text = "Frame Details:";
+            // 
             // btnParse
-            this.btnParse.Anchor = AnchorStyles.Top | AnchorStyles.Right;
-            this.btnParse.Location = new Point(525, 41);
-            this.btnParse.Name = "btnParse";
-            this.btnParse.Size = new Size(75, 23);
-            this.btnParse.TabIndex = 5;
-            this.btnParse.Text = "Parse";
-            this.btnParse.UseVisualStyleBackColor = true;
-            this.btnParse.Click += new EventHandler(this.btnParse_Click);
-
-            // btnExportMainFrames
-            this.btnExportMainFrames.Anchor = AnchorStyles.Bottom | AnchorStyles.Left;
-            this.btnExportMainFrames.Location = new Point(12, 415);
-            this.btnExportMainFrames.Name = "btnExportMainFrames";
-            this.btnExportMainFrames.Size = new Size(120, 23);
-            this.btnExportMainFrames.TabIndex = 6;
-            this.btnExportMainFrames.Text = "Export Main Frames";
-            this.btnExportMainFrames.UseVisualStyleBackColor = true;
-            this.btnExportMainFrames.Click += new EventHandler(this.btnExportMainFrames_Click);
-
-            // btnExportOBD2Frames
-            this.btnExportOBD2Frames.Anchor = AnchorStyles.Bottom | AnchorStyles.Left;
-            this.btnExportOBD2Frames.Location = new Point(142, 415);
-            this.btnExportOBD2Frames.Name = "btnExportOBD2Frames";
-            this.btnExportOBD2Frames.Size = new Size(120, 23);
-            this.btnExportOBD2Frames.TabIndex = 7;
-            this.btnExportOBD2Frames.Text = "Export OBD2 Frames";
-            this.btnExportOBD2Frames.UseVisualStyleBackColor = true;
-            this.btnExportOBD2Frames.Click += new EventHandler(this.btnExportOBD2Frames_Click);
-
+            // 
+            btnParse.Anchor = AnchorStyles.Top | AnchorStyles.Right;
+            btnParse.Location = new Point(600, 55);
+            btnParse.Margin = new Padding(3, 4, 3, 4);
+            btnParse.Name = "btnParse";
+            btnParse.Size = new Size(86, 31);
+            btnParse.TabIndex = 5;
+            btnParse.Text = "Parse";
+            btnParse.UseVisualStyleBackColor = true;
+            btnParse.Click += btnParse_Click;
+            // 
             // openFileDialog
-            this.openFileDialog.Filter = "Log files (*.log;*.txt)|*.log.*;*.log;*.txt|All files (*.*)|*.*";
-            this.openFileDialog.Title = "Select Log File";
-
+            // 
+            openFileDialog.Filter = "Log files (*.log;*.txt)|*.log.*;*.log;*.txt|All files (*.*)|*.*";
+            openFileDialog.Title = "Select Log File";
+            // 
+            // btnExportMainFrames
+            // 
+            btnExportMainFrames.Anchor = AnchorStyles.Bottom | AnchorStyles.Left;
+            btnExportMainFrames.Location = new Point(14, 553);
+            btnExportMainFrames.Margin = new Padding(3, 4, 3, 4);
+            btnExportMainFrames.Name = "btnExportMainFrames";
+            btnExportMainFrames.Size = new Size(137, 31);
+            btnExportMainFrames.TabIndex = 6;
+            btnExportMainFrames.Text = "Export Main Frames";
+            btnExportMainFrames.UseVisualStyleBackColor = true;
+            btnExportMainFrames.Click += btnExportMainFrames_Click;
+            // 
+            // btnExportOBD2Frames
+            // 
+            btnExportOBD2Frames.Anchor = AnchorStyles.Bottom | AnchorStyles.Left;
+            btnExportOBD2Frames.Location = new Point(162, 553);
+            btnExportOBD2Frames.Margin = new Padding(3, 4, 3, 4);
+            btnExportOBD2Frames.Name = "btnExportOBD2Frames";
+            btnExportOBD2Frames.Size = new Size(137, 31);
+            btnExportOBD2Frames.TabIndex = 7;
+            btnExportOBD2Frames.Text = "Export OBD2 Frames";
+            btnExportOBD2Frames.UseVisualStyleBackColor = true;
+            btnExportOBD2Frames.Click += btnExportOBD2Frames_Click;
+            // 
             // saveFileDialog
-            this.saveFileDialog.DefaultExt = "csv";
-            this.saveFileDialog.Filter = "CSV files (*.csv)|*.csv|All files (*.*)|*.*";
-
+            // 
+            saveFileDialog.DefaultExt = "csv";
+            saveFileDialog.Filter = "CSV files (*.csv)|*.csv|All files (*.*)|*.*";
+            // 
+            // btnDifTimerCSV
+            // 
+            btnDifTimerCSV.Anchor = AnchorStyles.Bottom | AnchorStyles.Left;
+            btnDifTimerCSV.Enabled = false;
+            btnDifTimerCSV.Location = new Point(528, 553);
+            btnDifTimerCSV.Margin = new Padding(3, 5, 3, 5);
+            btnDifTimerCSV.Name = "btnDifTimerCSV";
+            btnDifTimerCSV.Size = new Size(157, 31);
+            btnDifTimerCSV.TabIndex = 20;
+            btnDifTimerCSV.Text = "Export Dif Timer";
+            btnDifTimerCSV.UseVisualStyleBackColor = true;
+            btnDifTimerCSV.Click += btnDifTimerCSV_Click;
+            // 
+            // progressBar1
+            // 
+            progressBar1.Location = new Point(16, 50);
+            progressBar1.Margin = new Padding(3, 4, 3, 4);
+            progressBar1.Name = "progressBar1";
+            progressBar1.Size = new Size(577, 8);
+            progressBar1.TabIndex = 20;
+            progressBar1.Value = 20;
+            progressBar1.Visible = false;
+            // 
             // Form1
-            this.AutoScaleDimensions = new SizeF(7F, 15F);
-            this.AutoScaleMode = AutoScaleMode.Font;
-            this.ClientSize = new Size(612, 450);
-            this.Controls.Add(this.btnExportOBD2Frames);
-            this.Controls.Add(this.btnExportMainFrames);
-            this.Controls.Add(this.btnParse);
-            this.Controls.Add(this.txtFrameDetails);
-            this.Controls.Add(this.lblDetails);
-            this.Controls.Add(this.lstFrames);
-            this.Controls.Add(this.lblFrames);
-            this.Controls.Add(this.btnLoadFile);
-            this.Controls.Add(this.txtFilePath);
-            this.Controls.Add(this.lblFilePath);
-            this.Name = "Form1";
-            this.Text = "MCU Log Parser";
-            this.ResumeLayout(false);
-            this.PerformLayout();
+            // 
+            AutoScaleDimensions = new SizeF(8F, 20F);
+            AutoScaleMode = AutoScaleMode.Font;
+            ClientSize = new Size(699, 600);
+            Controls.Add(btnExportOBD2Frames);
+            Controls.Add(btnExportMainFrames);
+            Controls.Add(btnParse);
+            Controls.Add(btnDifTimerCSV);
+            Controls.Add(txtFrameDetails);
+            Controls.Add(lblDetails);
+            Controls.Add(lstFrames);
+            Controls.Add(lblFrames);
+            Controls.Add(btnLoadFile);
+            Controls.Add(txtFilePath);
+            Controls.Add(lblFilePath);
+            Controls.Add(progressBar1);
+            Margin = new Padding(3, 4, 3, 4);
+            Name = "Form1";
+            Text = "MCU Log Parser";
+            ResumeLayout(false);
+            PerformLayout();
         }
+
     }
 }

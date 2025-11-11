@@ -67,7 +67,8 @@ namespace Frame_Parser
             try
             {
                 var lines = File.ReadAllLines(filePath);
-
+                Program.MainForm.progressBar1.Show();
+                Program.MainForm.progressBar1.Maximum = lines.Length;
                 foreach (var line in lines)
                 {
                     try
@@ -83,7 +84,11 @@ namespace Frame_Parser
                         // Continue parsing other lines if one fails
                         System.Diagnostics.Debug.WriteLine($"Error parsing line: {line}. Error: {ex.Message}");
                     }
+                    Program.MainForm.progressBar1.Value = frames.Count;
+                    
+                    Application.DoEvents(); // Allow UI to update
                 }
+                Program.MainForm.progressBar1.Hide();
             }
             catch (Exception ex)
             {
