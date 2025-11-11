@@ -12,6 +12,9 @@
         private Label lblDetails;
         private Button btnParse;
         private OpenFileDialog openFileDialog;
+        private Button btnExportMainFrames;
+        private Button btnExportOBD2Frames;
+        private SaveFileDialog saveFileDialog;
 
         protected override void Dispose(bool disposing)
         {
@@ -34,6 +37,9 @@
             this.lblDetails = new Label();
             this.btnParse = new Button();
             this.openFileDialog = new OpenFileDialog();
+            this.btnExportMainFrames = new Button();
+            this.btnExportOBD2Frames = new Button();
+            this.saveFileDialog = new SaveFileDialog();
 
             SuspendLayout();
 
@@ -67,7 +73,7 @@
             this.lstFrames.ItemHeight = 15;
             this.lstFrames.Location = new Point(12, 70);
             this.lstFrames.Name = "lstFrames";
-            this.lstFrames.Size = new Size(250, 364);
+            this.lstFrames.Size = new Size(250, 334);
             this.lstFrames.TabIndex = 3;
             this.lstFrames.SelectedIndexChanged += new EventHandler(this.lstFrames_SelectedIndexChanged);
 
@@ -85,7 +91,7 @@
             this.txtFrameDetails.Name = "txtFrameDetails";
             this.txtFrameDetails.ReadOnly = true;
             this.txtFrameDetails.ScrollBars = ScrollBars.Vertical;
-            this.txtFrameDetails.Size = new Size(332, 364);
+            this.txtFrameDetails.Size = new Size(332, 334);
             this.txtFrameDetails.TabIndex = 4;
 
             // lblDetails
@@ -105,14 +111,40 @@
             this.btnParse.UseVisualStyleBackColor = true;
             this.btnParse.Click += new EventHandler(this.btnParse_Click);
 
+            // btnExportMainFrames
+            this.btnExportMainFrames.Anchor = AnchorStyles.Bottom | AnchorStyles.Left;
+            this.btnExportMainFrames.Location = new Point(12, 415);
+            this.btnExportMainFrames.Name = "btnExportMainFrames";
+            this.btnExportMainFrames.Size = new Size(120, 23);
+            this.btnExportMainFrames.TabIndex = 6;
+            this.btnExportMainFrames.Text = "Export Main Frames";
+            this.btnExportMainFrames.UseVisualStyleBackColor = true;
+            this.btnExportMainFrames.Click += new EventHandler(this.btnExportMainFrames_Click);
+
+            // btnExportOBD2Frames
+            this.btnExportOBD2Frames.Anchor = AnchorStyles.Bottom | AnchorStyles.Left;
+            this.btnExportOBD2Frames.Location = new Point(142, 415);
+            this.btnExportOBD2Frames.Name = "btnExportOBD2Frames";
+            this.btnExportOBD2Frames.Size = new Size(120, 23);
+            this.btnExportOBD2Frames.TabIndex = 7;
+            this.btnExportOBD2Frames.Text = "Export OBD2 Frames";
+            this.btnExportOBD2Frames.UseVisualStyleBackColor = true;
+            this.btnExportOBD2Frames.Click += new EventHandler(this.btnExportOBD2Frames_Click);
+
             // openFileDialog
-            this.openFileDialog.Filter = "Log files (*.log;*.txt)|*.log;*.txt|All files (*.*)|*.*";
+            this.openFileDialog.Filter = "Log files (*.log;*.txt)|*.log.*;*.log;*.txt|All files (*.*)|*.*";
             this.openFileDialog.Title = "Select Log File";
+
+            // saveFileDialog
+            this.saveFileDialog.DefaultExt = "csv";
+            this.saveFileDialog.Filter = "CSV files (*.csv)|*.csv|All files (*.*)|*.*";
 
             // Form1
             this.AutoScaleDimensions = new SizeF(7F, 15F);
             this.AutoScaleMode = AutoScaleMode.Font;
             this.ClientSize = new Size(612, 450);
+            this.Controls.Add(this.btnExportOBD2Frames);
+            this.Controls.Add(this.btnExportMainFrames);
             this.Controls.Add(this.btnParse);
             this.Controls.Add(this.txtFrameDetails);
             this.Controls.Add(this.lblDetails);

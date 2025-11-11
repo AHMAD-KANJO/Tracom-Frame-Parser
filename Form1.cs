@@ -1,91 +1,238 @@
+using System.Globalization;
+using System.Text;
 using System.Windows.Forms;
 
 namespace Frame_Parser
 {
+    public partial class Form1 : Form
+    {
+        private List<Frame> parsedFrames = new List<Frame>();
 
-        public partial class Form1 : Form
+        public Form1()
         {
-            private List<Frame> parsedFrames = new List<Frame>();
+            InitializeComponent();
+            UpdateExportButtons();
+        }
 
-            public Form1()
+        private void btnLoadFile_Click(object sender, EventArgs e)
+        {
+            if (openFileDialog.ShowDialog() == DialogResult.OK)
             {
-                InitializeComponent();
+                txtFilePath.Text = openFileDialog.FileName;
+            }
+        }
+
+        private void btnParse_Click(object sender, EventArgs e)
+        {
+            if (string.IsNullOrEmpty(txtFilePath.Text) || !File.Exists(txtFilePath.Text))
+            {
+                MessageBox.Show("Please select a valid log file.", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                return;
             }
 
-            private void btnLoadFile_Click(object sender, EventArgs e)
+            try
             {
-                if (openFileDialog.ShowDialog() == DialogResult.OK)
+                var parser = new LogParser();
+                parsedFrames = parser.ParseLogFile(txtFilePath.Text);
+
+                // Display frames in listbox
+                lstFrames.Items.Clear();
+                foreach (var frame in parsedFrames)
                 {
-                    txtFilePath.Text = openFileDialog.FileName;
+                    string frameType = frame.Type == FrameType.MainFrame ? "Main" : "OBD2";
+                    lstFrames.Items.Add($"{frame.Timestamp:HH:mm:ss.fff} - {frameType} Frame");
                 }
+
+                if (parsedFrames.Count > 0)
+                {
+                    lstFrames.SelectedIndex = 0;
+                    MessageBox.Show($"Successfully parsed {parsedFrames.Count} frames.", "Success",
+                                  MessageBoxButtons.OK, MessageBoxIcon.Information);
+                }
+                else
+                {
+                    MessageBox.Show("No valid frames found in the log file.", "Warning",
+                                  MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                }
+
+                UpdateExportButtons();
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show($"Error parsing file: {ex.Message}", "Error",
+                              MessageBoxButtons.OK, MessageBoxIcon.Error);
+            }
+        }
+
+        private void UpdateExportButtons()
+        {
+            bool hasFrames = parsedFrames.Count > 0;
+            bool hasMainFrames = parsedFrames.OfType<MainFrame>().Any();
+            bool hasOBD2Frames = parsedFrames.OfType<OBD2Frame>().Any();
+
+            btnExportMainFrames.Enabled = hasFrames && hasMainFrames;
+            btnExportOBD2Frames.Enabled = hasFrames && hasOBD2Frames;
+        }
+
+        private void lstFrames_SelectedIndexChanged(object sender, EventArgs e)
+        {
+            if (lstFrames.SelectedIndex >= 0 && lstFrames.SelectedIndex < parsedFrames.Count)
+            {
+                var frame = parsedFrames[lstFrames.SelectedIndex];
+                txtFrameDetails.Text = GetFrameDetails(frame);
+            }
+        }
+
+        private void btnExportMainFrames_Click(object sender, EventArgs e)
+        {
+            ExportFrames<MainFrame>("main.csv", "Main Frames");
+        }
+
+        private void btnExportOBD2Frames_Click(object sender, EventArgs e)
+        {
+            ExportFrames<OBD2Frame>("obd2.csv", "OBD2 Frames");
+        }
+
+        private void ExportFrames<T>(string defaultFileName, string frameTypeName) where T : Frame
+        {
+            var frames = parsedFrames.OfType<T>().ToList();
+
+            if (frames.Count == 0)
+            {
+                MessageBox.Show($"No {frameTypeName} found to export.", "Information",
+                              MessageBoxButtons.OK, MessageBoxIcon.Information);
+                return;
             }
 
-            private void btnParse_Click(object sender, EventArgs e)
-            {
-                if (string.IsNullOrEmpty(txtFilePath.Text) || !File.Exists(txtFilePath.Text))
-                {
-                    MessageBox.Show("Please select a valid log file.", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
-                    return;
-                }
+            saveFileDialog.FileName = defaultFileName;
+            saveFileDialog.Title = $"Export {frameTypeName} to CSV";
 
+            if (saveFileDialog.ShowDialog() == DialogResult.OK)
+            {
                 try
                 {
-                    var parser = new LogParser();
-                    parsedFrames = parser.ParseLogFile(txtFilePath.Text);
-
-                    // Display frames in listbox
-                    lstFrames.Items.Clear();
-                    foreach (var frame in parsedFrames)
+                    if (typeof(T) == typeof(MainFrame))
                     {
-                        string frameType = frame.Type == FrameType.MainFrame ? "Main" : "OBD2";
-                        lstFrames.Items.Add($"{frame.Timestamp:HH:mm:ss.fff} - {frameType} Frame");
+                        ExportMainFramesToCsv(frames as List<MainFrame>, saveFileDialog.FileName);
+                    }
+                    else if (typeof(T) == typeof(OBD2Frame))
+                    {
+                        ExportOBD2FramesToCsv(frames as List<OBD2Frame>, saveFileDialog.FileName);
                     }
 
-                    if (parsedFrames.Count > 0)
-                    {
-                        lstFrames.SelectedIndex = 0;
-                        MessageBox.Show($"Successfully parsed {parsedFrames.Count} frames.", "Success",
-                                      MessageBoxButtons.OK, MessageBoxIcon.Information);
-                    }
-                    else
-                    {
-                        MessageBox.Show("No valid frames found in the log file.", "Warning",
-                                      MessageBoxButtons.OK, MessageBoxIcon.Warning);
-                    }
+                    MessageBox.Show($"Successfully exported {frames.Count} {frameTypeName} to {saveFileDialog.FileName}",
+                                  "Success", MessageBoxButtons.OK, MessageBoxIcon.Information);
                 }
                 catch (Exception ex)
                 {
-                    MessageBox.Show($"Error parsing file: {ex.Message}", "Error",
+                    MessageBox.Show($"Error exporting {frameTypeName}: {ex.Message}", "Error",
                                   MessageBoxButtons.OK, MessageBoxIcon.Error);
                 }
             }
+        }
 
-            private void lstFrames_SelectedIndexChanged(object sender, EventArgs e)
+        private void ExportMainFramesToCsv(List<MainFrame> frames, string filePath)
+        {
+            var csv = new StringBuilder();
+
+            // Header
+            csv.AppendLine("Timestamp;FrameType;PayloadLength;Checksum;Timer1;Timer2;Inputs;AnalogInput1;AnalogInput2;AnalogInput3;AnalogInput4;AccX;AccY;AccZ;GyroX;GyroY;GyroZ;OneWire;VehicleBatteryVoltage;InternalBatteryVoltage;BoardTemperature;BatteryTemperature;TamperSensor;RawData");
+
+            // Data rows
+            foreach (var frame in frames)
             {
-                if (lstFrames.SelectedIndex >= 0 && lstFrames.SelectedIndex < parsedFrames.Count)
-                {
-                    var frame = parsedFrames[lstFrames.SelectedIndex];
-                    txtFrameDetails.Text = GetFrameDetails(frame);
-                }
+                var line = string.Join(";",
+                    frame.Timestamp.ToString("yyyy-MM-dd HH:mm:ss.fff"),
+                    ((byte)frame.Type).ToString("X2"),
+                    frame.PayloadLength,
+                    frame.Checksum.ToString("X2"),
+                    frame.Timer1.ToString("X4"),
+                    frame.Timer2.ToString("X4"),
+                    frame.Inputs.ToString("X4"),
+                    frame.AnalogInput1.ToString("X4"),
+                    frame.AnalogInput2.ToString("X4"),
+                    frame.AnalogInput3.ToString("X4"),
+                    frame.AnalogInput4.ToString("X4"),
+                    frame.AccX,
+                    frame.AccY,
+                    frame.AccZ,
+                    frame.GyroX,
+                    frame.GyroY,
+                    frame.GyroZ,
+                    frame.OneWire.ToString("X16"),
+                    frame.VehicleBatteryVoltage.ToString("X4"),
+                    frame.InternalBatteryVoltage.ToString("X4"),
+                    frame.BoardTemperature.ToString("X4"),
+                    frame.BatteryTemperature.ToString("X4"),
+                    frame.TamperSensor.ToString("X4"),
+                    EscapeCsvField(frame.RawData)
+                );
+                csv.AppendLine(line);
             }
 
-            private string GetFrameDetails(Frame frame)
-            {
-                if (frame is MainFrame mainFrame)
-                {
-                    return GetMainFrameDetails(mainFrame);
-                }
-                else if (frame is OBD2Frame obd2Frame)
-                {
-                    return GetOBD2FrameDetails(obd2Frame);
-                }
+            File.WriteAllText(filePath, csv.ToString(), Encoding.UTF8);
+        }
 
-                return "Unknown frame type";
+        private void ExportOBD2FramesToCsv(List<OBD2Frame> frames, string filePath)
+        {
+            var csv = new StringBuilder();
+
+            // Header
+            csv.AppendLine("Timestamp;FrameType;PayloadLength;Checksum;Speed;RPM;ActualRPM;Temperature;FuelTankLevel;EngineTotalHours;Odometer;DTC;RawData");
+
+            // Data rows
+            foreach (var frame in frames)
+            {
+                var line = string.Join(";",
+                    frame.Timestamp.ToString("yyyy-MM-dd HH:mm:ss.fff"),
+                    ((byte)frame.Type).ToString("X2"),
+                    frame.PayloadLength,
+                    frame.Checksum.ToString("X2"),
+                    frame.Speed,
+                    frame.RPM,
+                    frame.ActualRPM.ToString("F1", CultureInfo.InvariantCulture),
+                    frame.Temperature,
+                    frame.FuelTankLevel,
+                    frame.EngineTotalHours,
+                    frame.Odometer,
+                    frame.DTC.ToString("X8"),
+                    EscapeCsvField(frame.RawData)
+                );
+                csv.AppendLine(line);
             }
 
-            private string GetMainFrameDetails(MainFrame frame)
+            File.WriteAllText(filePath, csv.ToString(), Encoding.UTF8);
+        }
+
+        private string EscapeCsvField(string field)
+        {
+            if (field == null) return string.Empty;
+
+            // If field contains delimiter (;) or quotes, wrap in quotes and escape existing quotes
+            if (field.Contains(";") || field.Contains("\"") || field.Contains("\n") || field.Contains("\r"))
             {
-                return $@"MAIN FRAME DETAILS
+                return "\"" + field.Replace("\"", "\"\"") + "\"";
+            }
+            return field;
+        }
+
+        private string GetFrameDetails(Frame frame)
+        {
+            if (frame is MainFrame mainFrame)
+            {
+                return GetMainFrameDetails(mainFrame);
+            }
+            else if (frame is OBD2Frame obd2Frame)
+            {
+                return GetOBD2FrameDetails(obd2Frame);
+            }
+
+            return "Unknown frame type";
+        }
+
+        private string GetMainFrameDetails(MainFrame frame)
+        {
+            return $@"MAIN FRAME DETAILS
 --------------------
 Timestamp: {frame.Timestamp:yyyy-MM-dd HH:mm:ss.fff}
 Frame Type: 0x{((byte)frame.Type):X2} (Main Frame)
@@ -115,11 +262,11 @@ Internal Battery Voltage: 0x{frame.InternalBatteryVoltage:X4}
 Board Temperature: 0x{frame.BoardTemperature:X4}
 Battery Temperature: 0x{frame.BatteryTemperature:X4}
 Tamper Sensor: 0x{frame.TamperSensor:X4}";
-            }
+        }
 
-            private string GetOBD2FrameDetails(OBD2Frame frame)
-            {
-                return $@"OBD2 FRAME DETAILS
+        private string GetOBD2FrameDetails(OBD2Frame frame)
+        {
+            return $@"OBD2 FRAME DETAILS
 --------------------
 Timestamp: {frame.Timestamp:yyyy-MM-dd HH:mm:ss.fff}
 Frame Type: 0x{((byte)frame.Type):X2} (OBD2 Frame)
@@ -137,7 +284,7 @@ Fuel Tank Level: {frame.FuelTankLevel}%
 Engine Total Hours: {frame.EngineTotalHours} seconds
 Odometer: {frame.Odometer:N0} km
 Diagnostic Trouble Code: 0x{frame.DTC:X8}";
-            }
         }
-   
+    }
+
 }
