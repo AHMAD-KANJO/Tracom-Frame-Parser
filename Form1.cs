@@ -46,15 +46,17 @@ namespace Frame_Parser
                 lstFrames.Items.Clear();
                 Program.MainForm.progressBar1.Show();
                 Program.MainForm.progressBar1.Maximum = parsedFrames.Count;
+                lstFrames.Hide();
                 foreach (var frame in parsedFrames)
                 {
                     string frameType = frame.Type == FrameType.MainFrame ? "Main" : "OBD2";
+
                     lstFrames.Items.Add($"{frame.Timestamp:HH:mm:ss.fff} - {frameType} Frame");
                     Program.MainForm.progressBar1.Value = lstFrames.Items.Count;
                     Application.DoEvents(); // Allow UI to update
                 }
                 Program.MainForm.progressBar1.Hide();
-                
+                lstFrames.Show();
 
                 if (parsedFrames.Count > 0)
                 {
@@ -88,6 +90,55 @@ namespace Frame_Parser
             btnExportMainFrames.Enabled = hasFrames && hasMainFrames;
             btnExportOBD2Frames.Enabled = hasFrames && hasOBD2Frames;
             btnDifTimerCSV.Enabled = btnExportMainFrames.Enabled;
+            btnSpikeDetection.Enabled = hasFrames && parsedFrames.Count > 0;
+        }
+
+        private Button btnSpikeDetection;
+
+        // Add to InitializeComponent() in Form1.Designer.cs
+        //private void InitializeComponent()
+        //{
+        //    // ... existing controls ...
+
+        //    this.btnSpikeDetection = new Button();
+
+        //    // btnSpikeDetection
+        //    this.btnSpikeDetection.Anchor = AnchorStyles.Bottom | AnchorStyles.Left;
+        //    this.btnSpikeDetection.Location = new Point(268, 415);
+        //    this.btnSpikeDetection.Name = "btnSpikeDetection";
+        //    this.btnSpikeDetection.Size = new Size(120, 23);
+        //    this.btnSpikeDetection.TabIndex = 10;
+        //    this.btnSpikeDetection.Text = "Spike Detection";
+        //    this.btnSpikeDetection.UseVisualStyleBackColor = true;
+        //    this.btnSpikeDetection.Click += new EventHandler(this.btnSpikeDetection_Click);
+
+        //    // Add to controls collection
+        //    this.Controls.Add(this.btnSpikeDetection);
+        //}
+
+        // Add this method to Form1.cs
+        private void btnSpikeDetection_Click(object sender, EventArgs e)
+        {
+            if (parsedFrames.Count == 0)
+            {
+                MessageBox.Show("Please parse a log file first.", "No Data",
+                              MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                return;
+            }
+
+            var spikeForm = new SpikeDetectionForm(parsedFrames);
+            spikeForm.ShowDialog();
+        }
+
+        // Update the SetControlsEnabled method to include the new button
+        private void SetControlsEnabled(bool enabled)
+        {
+            btnLoadFile.Enabled = enabled;
+            btnParse.Enabled = enabled;
+            txtFilePath.Enabled = enabled;
+            btnExportMainFrames.Enabled = enabled && parsedFrames.OfType<MainFrame>().Any();
+            btnExportOBD2Frames.Enabled = enabled && parsedFrames.OfType<OBD2Frame>().Any();
+            btnSpikeDetection.Enabled = enabled && parsedFrames.Count > 0;
         }
 
         private void lstFrames_SelectedIndexChanged(object sender, EventArgs e)

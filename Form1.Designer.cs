@@ -42,6 +42,7 @@
             saveFileDialog = new SaveFileDialog();
             btnDifTimerCSV = new Button();
             progressBar1 = new ProgressBar();
+            btnSpikeDetection = new Button();
             SuspendLayout();
             // 
             // btnLoadFile
@@ -184,6 +185,17 @@
             progressBar1.Value = 20;
             progressBar1.Visible = false;
             // 
+            // btnSpikeDetection
+            // 
+            btnSpikeDetection.Anchor = AnchorStyles.Bottom | AnchorStyles.Left;
+            btnSpikeDetection.Location = new Point(382, 553);
+            btnSpikeDetection.Name = "btnSpikeDetection";
+            btnSpikeDetection.Size = new Size(125, 31);
+            btnSpikeDetection.TabIndex = 10;
+            btnSpikeDetection.Text = "Spike Detection";
+            btnSpikeDetection.UseVisualStyleBackColor = true;
+            btnSpikeDetection.Click += btnSpikeDetection_Click;
+            // 
             // Form1
             // 
             AutoScaleDimensions = new SizeF(8F, 20F);
@@ -201,6 +213,7 @@
             Controls.Add(txtFilePath);
             Controls.Add(lblFilePath);
             Controls.Add(progressBar1);
+            Controls.Add(btnSpikeDetection);
             Margin = new Padding(3, 4, 3, 4);
             Name = "Form1";
             Text = "MCU Log Parser";
