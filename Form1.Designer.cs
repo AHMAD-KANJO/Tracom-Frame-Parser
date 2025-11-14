@@ -43,6 +43,9 @@
             btnDifTimerCSV = new Button();
             progressBar1 = new ProgressBar();
             btnSpikeDetection = new Button();
+            textLog = new TextBox();
+            cbAutoParse = new CheckBox();
+            cbOnlyMainFrame = new CheckBox();
             SuspendLayout();
             // 
             // btnLoadFile
@@ -82,7 +85,7 @@
             lstFrames.Location = new Point(14, 93);
             lstFrames.Margin = new Padding(3, 4, 3, 4);
             lstFrames.Name = "lstFrames";
-            lstFrames.Size = new Size(285, 444);
+            lstFrames.Size = new Size(285, 504);
             lstFrames.TabIndex = 3;
             lstFrames.SelectedIndexChanged += lstFrames_SelectedIndexChanged;
             // 
@@ -104,7 +107,7 @@
             txtFrameDetails.Name = "txtFrameDetails";
             txtFrameDetails.ReadOnly = true;
             txtFrameDetails.ScrollBars = ScrollBars.Vertical;
-            txtFrameDetails.Size = new Size(379, 444);
+            txtFrameDetails.Size = new Size(379, 504);
             txtFrameDetails.TabIndex = 4;
             // 
             // lblDetails
@@ -119,13 +122,14 @@
             // btnParse
             // 
             btnParse.Anchor = AnchorStyles.Top | AnchorStyles.Right;
-            btnParse.Location = new Point(600, 55);
+            btnParse.Location = new Point(507, 50);
             btnParse.Margin = new Padding(3, 4, 3, 4);
             btnParse.Name = "btnParse";
             btnParse.Size = new Size(86, 31);
             btnParse.TabIndex = 5;
             btnParse.Text = "Parse";
             btnParse.UseVisualStyleBackColor = true;
+            btnParse.Visible = false;
             btnParse.Click += btnParse_Click;
             // 
             // openFileDialog
@@ -136,7 +140,7 @@
             // btnExportMainFrames
             // 
             btnExportMainFrames.Anchor = AnchorStyles.Bottom | AnchorStyles.Left;
-            btnExportMainFrames.Location = new Point(14, 553);
+            btnExportMainFrames.Location = new Point(16, 606);
             btnExportMainFrames.Margin = new Padding(3, 4, 3, 4);
             btnExportMainFrames.Name = "btnExportMainFrames";
             btnExportMainFrames.Size = new Size(137, 31);
@@ -148,7 +152,7 @@
             // btnExportOBD2Frames
             // 
             btnExportOBD2Frames.Anchor = AnchorStyles.Bottom | AnchorStyles.Left;
-            btnExportOBD2Frames.Location = new Point(162, 553);
+            btnExportOBD2Frames.Location = new Point(164, 606);
             btnExportOBD2Frames.Margin = new Padding(3, 4, 3, 4);
             btnExportOBD2Frames.Name = "btnExportOBD2Frames";
             btnExportOBD2Frames.Size = new Size(137, 31);
@@ -166,7 +170,7 @@
             // 
             btnDifTimerCSV.Anchor = AnchorStyles.Bottom | AnchorStyles.Left;
             btnDifTimerCSV.Enabled = false;
-            btnDifTimerCSV.Location = new Point(528, 553);
+            btnDifTimerCSV.Location = new Point(530, 606);
             btnDifTimerCSV.Margin = new Padding(3, 5, 3, 5);
             btnDifTimerCSV.Name = "btnDifTimerCSV";
             btnDifTimerCSV.Size = new Size(157, 31);
@@ -177,10 +181,10 @@
             // 
             // progressBar1
             // 
-            progressBar1.Location = new Point(16, 50);
+            progressBar1.Location = new Point(79, 13);
             progressBar1.Margin = new Padding(3, 4, 3, 4);
             progressBar1.Name = "progressBar1";
-            progressBar1.Size = new Size(577, 8);
+            progressBar1.Size = new Size(514, 5);
             progressBar1.TabIndex = 20;
             progressBar1.Value = 20;
             progressBar1.Visible = false;
@@ -188,7 +192,7 @@
             // btnSpikeDetection
             // 
             btnSpikeDetection.Anchor = AnchorStyles.Bottom | AnchorStyles.Left;
-            btnSpikeDetection.Location = new Point(382, 553);
+            btnSpikeDetection.Location = new Point(384, 606);
             btnSpikeDetection.Name = "btnSpikeDetection";
             btnSpikeDetection.Size = new Size(125, 31);
             btnSpikeDetection.TabIndex = 10;
@@ -196,11 +200,53 @@
             btnSpikeDetection.UseVisualStyleBackColor = true;
             btnSpikeDetection.Click += btnSpikeDetection_Click;
             // 
+            // textLog
+            // 
+            textLog.Anchor = AnchorStyles.Top | AnchorStyles.Bottom | AnchorStyles.Left | AnchorStyles.Right;
+            textLog.BackColor = SystemColors.Window;
+            textLog.Location = new Point(16, 644);
+            textLog.Margin = new Padding(3, 4, 3, 4);
+            textLog.Multiline = true;
+            textLog.Name = "textLog";
+            textLog.ReadOnly = true;
+            textLog.ScrollBars = ScrollBars.Vertical;
+            textLog.Size = new Size(669, 150);
+            textLog.TabIndex = 24;
+            // 
+            // cbAutoParse
+            // 
+            cbAutoParse.AutoSize = true;
+            cbAutoParse.Checked = true;
+            cbAutoParse.CheckState = CheckState.Checked;
+            cbAutoParse.Location = new Point(600, 54);
+            cbAutoParse.Name = "cbAutoParse";
+            cbAutoParse.Size = new Size(63, 24);
+            cbAutoParse.TabIndex = 25;
+            cbAutoParse.Text = "Auto";
+            cbAutoParse.UseVisualStyleBackColor = true;
+            cbAutoParse.CheckedChanged += cbAutoParse_CheckedChanged;
+            // 
+            // cbOnlyMainFrame
+            // 
+            cbOnlyMainFrame.AutoSize = true;
+            cbOnlyMainFrame.Checked = true;
+            cbOnlyMainFrame.CheckState = CheckState.Checked;
+            cbOnlyMainFrame.Location = new Point(358, 50);
+            cbOnlyMainFrame.Name = "cbOnlyMainFrame";
+            cbOnlyMainFrame.Size = new Size(143, 24);
+            cbOnlyMainFrame.TabIndex = 26;
+            cbOnlyMainFrame.Text = "Only Main Frame";
+            cbOnlyMainFrame.UseVisualStyleBackColor = true;
+            // 
             // Form1
             // 
             AutoScaleDimensions = new SizeF(8F, 20F);
             AutoScaleMode = AutoScaleMode.Font;
-            ClientSize = new Size(699, 600);
+            ClientSize = new Size(699, 807);
+            Controls.Add(cbOnlyMainFrame);
+            Controls.Add(progressBar1);
+            Controls.Add(cbAutoParse);
+            Controls.Add(textLog);
             Controls.Add(btnExportOBD2Frames);
             Controls.Add(btnExportMainFrames);
             Controls.Add(btnParse);
@@ -212,7 +258,6 @@
             Controls.Add(btnLoadFile);
             Controls.Add(txtFilePath);
             Controls.Add(lblFilePath);
-            Controls.Add(progressBar1);
             Controls.Add(btnSpikeDetection);
             Margin = new Padding(3, 4, 3, 4);
             Name = "Form1";
@@ -220,6 +265,8 @@
             ResumeLayout(false);
             PerformLayout();
         }
-
+        private TextBox textLog;
+        private CheckBox cbAutoParse;
+        private CheckBox cbOnlyMainFrame;
     }
 }

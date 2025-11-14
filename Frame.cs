@@ -60,20 +60,21 @@ namespace Frame_Parser
 
     public class LogParser
     {
-        public List<Frame> ParseLogFile(string filePath)
+        public List<Frame> ParseLogFile(string filePath, bool @IsOnlyMain)
         {
             var frames = new List<Frame>();
 
             try
             {
                 var lines = File.ReadAllLines(filePath);
+                Program.MainForm.Log($"{lines.Length} Lines.");
                 Program.MainForm.progressBar1.Show();
                 Program.MainForm.progressBar1.Maximum = lines.Length;
                 foreach (var line in lines)
                 {
                     try
                     {
-                        var frame = ParseLine(line);
+                        var frame = ParseLine(line, IsOnlyMain);
                         if (frame != null)
                         {
                             frames.Add(frame);
@@ -98,8 +99,15 @@ namespace Frame_Parser
             return frames;
         }
 
-        private Frame ParseLine(string line)
+        private Frame ParseLine(string line, Boolean IsOnlyMain)
         {
+            //var frameContent = line.Substring(33);
+            //var frameType = (FrameType)HexToByte(frameContent.Substring(0, 2));
+            //var payloadHex = frameContent.Substring(6);
+            //if (frameType == FrameType.MainFrame)
+            //    return ParseMainFrame(payloadHex);
+            //return null;
+
             var parts = line.Split(':');
             if (parts.Length < 3) return null;
 
@@ -117,6 +125,11 @@ namespace Frame_Parser
             var payloadLength = HexToUInt16(frameContent.Substring(2, 4));
 
             var payloadHex = frameContent.Substring(6, payloadLength * 2);
+
+            //To accelerate parsing, filter only main frame
+            if (IsOnlyMain && frameType != FrameType.MainFrame)
+                return null;
+
             var checksumHex = frameContent.Substring(6 + payloadLength * 2, 2);
             var checksum = HexToByte(checksumHex);
 
@@ -128,6 +141,7 @@ namespace Frame_Parser
                     frame = ParseMainFrame(payloadHex);
                     break;
                 case FrameType.OBD2Frame:
+
                     frame = ParseOBD2Frame(payloadHex);
                     break;
                 default:
@@ -156,6 +170,8 @@ namespace Frame_Parser
 
             frame.Timer1 = HexToUInt16(GetHexSubstring(payloadHex, ref index, 2));
             frame.Timer2 = HexToUInt16(GetHexSubstring(payloadHex, ref index, 2));
+            //return frame;
+
             frame.Inputs = HexToUInt16(GetHexSubstring(payloadHex, ref index, 2));
             frame.AnalogInput1 = HexToUInt16(GetHexSubstring(payloadHex, ref index, 2));
             frame.AnalogInput2 = HexToUInt16(GetHexSubstring(payloadHex, ref index, 2));

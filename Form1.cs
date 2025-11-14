@@ -1,4 +1,6 @@
+using System.Diagnostics;
 using System.Globalization;
+using System.Linq;
 using System.Text;
 using System.Windows.Forms;
 using static System.Windows.Forms.LinkLabel;
@@ -15,11 +17,20 @@ namespace Frame_Parser
             UpdateExportButtons();
         }
 
+        public void Log(String Text)
+        {
+            textLog.Text += Text + "\r\n";
+            textLog.Select(textLog.Text.Length,0); textLog.ScrollToCaret();
+        }
+
         private void btnLoadFile_Click(object sender, EventArgs e)
         {
             if (openFileDialog.ShowDialog() == DialogResult.OK)
             {
+                Log(openFileDialog.FileName + " Selected.");
                 txtFilePath.Text = openFileDialog.FileName;
+                if (cbAutoParse.Checked && btnParse.Enabled)
+                    btnParse_Click(sender, e);
             }
         }
 
@@ -31,6 +42,8 @@ namespace Frame_Parser
                 return;
             }
 
+            var Watch = Stopwatch.StartNew();
+
             btnParse.Enabled = false;
             parsedFrames.Clear();
             lstFrames.Items.Clear();
@@ -40,13 +53,16 @@ namespace Frame_Parser
             try
             {
                 var parser = new LogParser();
-                parsedFrames = parser.ParseLogFile(txtFilePath.Text);
+                parsedFrames = parser.ParseLogFile(txtFilePath.Text, cbOnlyMainFrame.Checked);
 
                 // Display frames in listbox
+                Log($"{parsedFrames.Count} Frame Detected. " +Watch.ElapsedMilliseconds + " ms");
+                Watch.Restart();
+
                 lstFrames.Items.Clear();
                 Program.MainForm.progressBar1.Show();
                 Program.MainForm.progressBar1.Maximum = parsedFrames.Count;
-                lstFrames.Hide();
+                //lstFrames.Hide();
                 foreach (var frame in parsedFrames)
                 {
                     string frameType = frame.Type == FrameType.MainFrame ? "Main" : "OBD2";
@@ -61,13 +77,13 @@ namespace Frame_Parser
                 if (parsedFrames.Count > 0)
                 {
                     lstFrames.SelectedIndex = 0;
-                    MessageBox.Show($"Successfully parsed {parsedFrames.Count} frames.", "Success",
-                                  MessageBoxButtons.OK, MessageBoxIcon.Information);
+                    Log($"Successfully parsed {parsedFrames.Count} frames. "+Watch.ElapsedMilliseconds+" ms"); //, "Success",
+                                                                              // MessageBoxButtons.OK, MessageBoxIcon.Information);
                 }
                 else
                 {
-                    MessageBox.Show("No valid frames found in the log file.", "Warning",
-                                  MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                    Log("No valid frames found in the log file.");//, "Warning",
+                                                                  //  MessageBoxButtons.OK, MessageBoxIcon.Warning);
                 }
 
                 UpdateExportButtons();
@@ -77,6 +93,7 @@ namespace Frame_Parser
                 MessageBox.Show($"Error parsing file: {ex.Message}", "Error",
                               MessageBoxButtons.OK, MessageBoxIcon.Error);
             }
+
 
             btnParse.Enabled = true;
         }
@@ -246,8 +263,8 @@ namespace Frame_Parser
 
             // Header
             csv.AppendLine("Timestamp;Timer1;Timer2;Dif1;Dif2");
-                var LastT1 = frames[0].Timer1;
-                var LastT2 = frames[0].Timer2;
+            var LastT1 = frames[0].Timer1;
+            var LastT2 = frames[0].Timer2;
 
             // Data rows
             foreach (var frame in frames)
@@ -403,6 +420,11 @@ Diagnostic Trouble Code: 0x{frame.DTC:X8}";
                                   MessageBoxButtons.OK, MessageBoxIcon.Error);
                 }
             }
+        }
+
+        private void cbAutoParse_CheckedChanged(object sender, EventArgs e)
+        {
+            btnParse.Visible = !cbAutoParse.Checked;
         }
     }
 

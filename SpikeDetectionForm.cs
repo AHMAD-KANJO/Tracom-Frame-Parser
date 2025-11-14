@@ -112,13 +112,13 @@ namespace Frame_Parser
             gridSpikes.Columns.Add("CurrentValue", "Current Value");
             gridSpikes.Columns.Add("PreviousValue", "Previous Value");
             gridSpikes.Columns.Add("NextValue", "Next Value");
-            gridSpikes.Columns.Add("ChangePercent", "Change");
+            gridSpikes.Columns.Add("Change", "Change");
             gridSpikes.Columns.Add("Threshold", "Threshold");
             gridSpikes.Columns.Add("TimeDifference", "Time Difference");
 
             // Format numeric columns
-            gridSpikes.Columns["ChangePercent"].DefaultCellStyle.Format = "F1";
-            gridSpikes.Columns["ChangePercent"].DefaultCellStyle.Alignment = DataGridViewContentAlignment.MiddleRight;
+            gridSpikes.Columns["Change"].DefaultCellStyle.Format = "F1";
+            gridSpikes.Columns["Change"].DefaultCellStyle.Alignment = DataGridViewContentAlignment.MiddleRight;
             gridSpikes.Columns["Threshold"].DefaultCellStyle.Format = "F1";
             gridSpikes.Columns["Threshold"].DefaultCellStyle.Alignment = DataGridViewContentAlignment.MiddleRight;
             gridSpikes.Columns["CurrentValue"].DefaultCellStyle.Alignment = DataGridViewContentAlignment.MiddleRight;
@@ -206,7 +206,7 @@ namespace Frame_Parser
                         CurrentValue = currentValue,
                         PreviousValue = previousValue,
                         NextValue = NextValue,
-                        ChangePercent = change, // changePercent,
+                        Change = change, // changePercent,
                         Threshold = threshold,
                         TimeDifference = timeDifference,
                         PreviousFrame = previousFrame
@@ -273,7 +273,7 @@ namespace Frame_Parser
         {
             gridSpikes.Rows.Clear();
 
-            foreach (var spike in detectedSpikes.OrderByDescending(s => s.ChangePercent))
+            foreach (var spike in detectedSpikes.OrderByDescending(s => s.Change))
             {
                 gridSpikes.Rows.Add(
                     spike.Frame.Timestamp.ToString("yyyy-MM-dd HH:mm:ss.fff"),
@@ -282,7 +282,8 @@ namespace Frame_Parser
                     spike.CurrentValue.ToString("F2"),
                     spike.PreviousValue.ToString("F2"),
                     spike.NextValue.ToString("F2"),
-                    spike.ChangePercent,
+                    spike.Change,
+                    spike.Threshold,
                     spike.TimeDifference.ToString(@"hh\:mm\:ss\.fff")
                 );
             }
@@ -343,7 +344,7 @@ namespace Frame_Parser
             details.AppendLine($"Previous Value: {spike.PreviousValue:F2}");
             details.AppendLine($"Current Value: {spike.CurrentValue:F2}");
             details.AppendLine($"Absolute Change: {Math.Abs(spike.CurrentValue - spike.PreviousValue):F2}");
-            details.AppendLine($"Change Percentage: {spike.ChangePercent:F1}%");
+            details.AppendLine($"Change Percentage: {spike.Change:F1}%");
             details.AppendLine($"Threshold: {spike.Threshold:F1}%");
             details.AppendLine();
             details.AppendLine($"RAW DATA:");
@@ -404,7 +405,7 @@ namespace Frame_Parser
                     spike.CurrentValue.ToString("F2", CultureInfo.InvariantCulture),
                     spike.PreviousValue.ToString("F2", CultureInfo.InvariantCulture),
                     spike.NextValue.ToString("F2", CultureInfo.InvariantCulture),
-                    spike.ChangePercent.ToString("F1", CultureInfo.InvariantCulture),
+                    spike.Change.ToString("F1", CultureInfo.InvariantCulture),
                     spike.Threshold.ToString("F1", CultureInfo.InvariantCulture),
                     spike.TimeDifference.ToString(@"hh\:mm\:ss\.fff"),
                     EscapeCsvField(spike.Frame.RawData),
@@ -476,7 +477,7 @@ namespace Frame_Parser
         public double CurrentValue { get; set; }
         public double PreviousValue { get; set; }
         public double NextValue { get; set; }
-        public double ChangePercent { get; set; }
+        public double Change { get; set; }
         public double Threshold { get; set; }
         public TimeSpan TimeDifference { get; set; }
     }

@@ -100,9 +100,9 @@
             lblThreshold.AutoSize = true;
             lblThreshold.Location = new Point(14, 100);
             lblThreshold.Name = "lblThreshold";
-            lblThreshold.Size = new Size(143, 20);
+            lblThreshold.Size = new Size(117, 20);
             lblThreshold.TabIndex = 10;
-            lblThreshold.Text = "Spike Threshold (%):";
+            lblThreshold.Text = "Spike Threshold:";
             // 
             // btnDetectSpikes
             // 
